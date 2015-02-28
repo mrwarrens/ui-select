@@ -181,7 +181,9 @@ uis.directive('uiSelect',
             $select.activate();
           }
 
-          scope.$digest();
+          if(!scope.$$phase) {
+            scope.$apply();
+          }
         });
 
         focusser.bind("keyup input", function(e){
@@ -192,7 +194,9 @@ uis.directive('uiSelect',
 
           $select.activate(focusser.val()); //User pressed some regular key, so we pass it to the search input
           focusser.val('');
-          scope.$digest();
+          if(!scope.$$phase) {
+            scope.$apply();
+          }
 
         });
 
@@ -312,7 +316,9 @@ uis.directive('uiSelect',
           var skipFocusser = targetScope && targetScope.$select && targetScope.$select !== $select; //To check if target is other ui-select
           if (!skipFocusser) skipFocusser =  ~focusableControls.indexOf(e.target.tagName.toLowerCase()); //Check if target is input, button or textarea
           $select.close(skipFocusser);
-          scope.$digest();
+          if(!scope.$$phase) {
+            scope.$apply();
+          }
         }
         $select.clickTriggeredSelect = false;
       }
