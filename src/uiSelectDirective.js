@@ -1,6 +1,6 @@
 uis.directive('uiSelect',
-  ['$document', 'uiSelectConfig', 'uiSelectMinErr', '$compile', '$parse',
-  function($document, uiSelectConfig, uiSelectMinErr, $compile, $parse) {
+  ['$document', '$timeout', 'uiSelectConfig', 'uiSelectMinErr', '$compile', '$parse',
+  function($document, $timeout, uiSelectConfig, uiSelectMinErr, $compile, $parse) {
 
   return {
     restrict: 'EA',
@@ -181,9 +181,7 @@ uis.directive('uiSelect',
             $select.activate();
           }
 
-          if(!scope.$$phase) {
-            scope.$apply();
-          }
+          scope.$digest();
         });
 
         focusser.bind("keyup input", function(e){
@@ -194,9 +192,7 @@ uis.directive('uiSelect',
 
           $select.activate(focusser.val()); //User pressed some regular key, so we pass it to the search input
           focusser.val('');
-          if(!scope.$$phase) {
-            scope.$apply();
-          }
+          scope.$digest();
 
         });
 
@@ -299,28 +295,27 @@ uis.directive('uiSelect',
       function onDocumentClick(e) {
         if (!$select.open) return; //Skip it if dropdown is close
 
-        var contains = false;
+        $timeout(function() {
+          var contains = false;
 
-        if (window.jQuery) {
-          // Firefox 3.6 does not support element.contains()
-          // See Node.contains https://developer.mozilla.org/en-US/docs/Web/API/Node.contains
-          contains = window.jQuery.contains(element[0], e.target);
-        } else {
-          contains = element[0].contains(e.target);
-        }
-
-        if (!contains && !$select.clickTriggeredSelect) {
-          //Will lose focus only with certain targets
-          var focusableControls = ['input','button','textarea'];
-          var targetScope = angular.element(e.target).scope(); //To check if target is other ui-select
-          var skipFocusser = targetScope && targetScope.$select && targetScope.$select !== $select; //To check if target is other ui-select
-          if (!skipFocusser) skipFocusser =  ~focusableControls.indexOf(e.target.tagName.toLowerCase()); //Check if target is input, button or textarea
-          $select.close(skipFocusser);
-          if(!scope.$$phase) {
-            scope.$apply();
+          if (window.jQuery) {
+            // Firefox 3.6 does not support element.contains()
+            // See Node.contains https://developer.mozilla.org/en-US/docs/Web/API/Node.contains
+            contains = window.jQuery.contains(element[0], e.target);
+          } else {
+            contains = element[0].contains(e.target);
           }
-        }
-        $select.clickTriggeredSelect = false;
+
+          if (!contains && !$select.clickTriggeredSelect) {
+            //Will lose focus only with certain targets
+            var focusableControls = ['input','button','textarea'];
+            var targetScope = angular.element(e.target).scope(); //To check if target is other ui-select
+            var skipFocusser = targetScope && targetScope.$select && targetScope.$select !== $select; //To check if target is other ui-select
+            if (!skipFocusser) skipFocusser =  ~focusableControls.indexOf(e.target.tagName.toLowerCase()); //Check if target is input, button or textarea
+            $select.close(skipFocusser);
+          }
+          $select.clickTriggeredSelect = false;
+        }, 0);
       }
 
       // See Click everywhere but here event http://stackoverflow.com/questions/12931369

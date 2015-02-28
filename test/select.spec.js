@@ -117,11 +117,13 @@ describe('ui-select tests', function() {
 
     $(el).find('.ui-select-choices-row div:contains("' + text + '")').click();
     scope.$digest();
+    $timeout.flush();
   }
 
   function clickMatch(el) {
     $(el).find('.ui-select-match > span:first').click();
     scope.$digest();
+    $timeout.flush();
   }
 
   function isDropdownOpened(el) {
@@ -845,7 +847,6 @@ describe('ui-select tests', function() {
     expect(scope.$model).toBeFalsy();
 
     clickItem(el, 'Samantha');
-    $timeout.flush();
 
 
     expect(scope.selection.selected).toBe('Samantha');
